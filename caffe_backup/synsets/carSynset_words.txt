@@ -1,0 +1,6 @@
+car0000a0 Alto
+car0000a1 Ford_fox
+car0000a2 Chhe
+car0000a3 redq
+car0000a4 xial
+car0000a5 yage
