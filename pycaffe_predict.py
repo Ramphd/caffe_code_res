@@ -9,19 +9,19 @@ caffe_root = '/home/cari/caffe_150323/'
 
 MODEL_FILE = caffe_root+'CarStyle_test/model_files/car_deploy.prototxt'
 PRETRAINED = caffe_root+'CarStyle_test/trained_model/408_crop_iter_2400.caffemodel'
-#IMAGE_FILE = caffe_root +  'CarStyle_test/Images/Fox/Fox_val/Fox0069.jpg'
+#IMAGE_FILE = caffe_root +  'CarStyle_test/Done/Fox/Fox_val/Fox0069.jpg'
 #outpath = '/home/cari/caffe_150323/CarStyle_test/car_mean_npy.npy'
 np_mean_file = '/home/cari/caffe_150323/CarStyle_test/car_mean.binaryproto'
 npy_mean_file = '/home/cari/caffe_150323/CarStyle_test/car_mean_npy.npy'
-Chhe_file = caffe_root + 'CarStyle_test/Images/Chhe/Chhe_val/Chhe0109.jpg'
-cat_file = caffe_root + 'examples/images/cat.jpg'
-Fox_file = caffe_root +  'CarStyle_test/Images/Fox/Fox_val/Fox0035.jpg'
-Alto_file = caffe_root +  'CarStyle_test/Images/Alto/Alto_val/Alto0123.jpg'
-Alto_file_fo = caffe_root +  'CarStyle_test/Images/Alto/Alto_val/Alto'
+Chhe_file = caffe_root + 'CarStyle_test/Done/Chhe/Chhe_val/Chhev0019.jpg'
+cat_file = caffe_root + 'examples/Done/cat.jpg'
+Fox_file = caffe_root +  'CarStyle_test/Done/Fox/Fox_val/Foxv0035.jpg'
+Alto_file = caffe_root +  'CarStyle_test/Done/Alto/Alto_val/Altov0123.jpg'
+Alto_file_fo = caffe_root +  'CarStyle_test/Done/Alto/Alto_val/Alto'
 xial_file = caffe_root + 'CarStyle_test/Done/xial/xial_val/xialv0011.jpg'
 redq_file = caffe_root + 'CarStyle_test/Done/redq/redq_val/redqv0029.jpg'
 yage_file = caffe_root + 'CarStyle_test/Done/yage/yage_val/yagev0040.jpg'
-other_test_file = '/home/cari/Downloads/Alto0861.jpg'
+other_test_file = '/home/cari/Downloads/Altov0861.jpg'
 Alto_file_t = '.jpg'
 blob = caffe_pb2.BlobProto()
 blob.ParseFromString(open(np_mean_file, "rb").read())
@@ -34,7 +34,7 @@ net = caffe.Classifier(MODEL_FILE, PRETRAINED,mean=np.load(npy_mean_file).mean(1
                        image_dims=(133,133))
 #net1 = caffe.Net(arg0, arg1, arg2)
 
-input_image  = caffe.io.load_image(Chhe_file)
+input_image  = caffe.io.load_image(Fox_file)
 #input_image1= caffe.io.load_image(Alto_file_fo + '0019'+Alto_file_t)
 #input_image2= caffe.io.load_image(Alto_file_fo + '0015'+Alto_file_t)
 #input_image3= caffe.io.load_image(Alto_file_fo + '0010'+Alto_file_t)
