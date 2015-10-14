@@ -1,6 +1,6 @@
-name: "car_full"
+name: "carNet"
 layer {
-  name: "cifar"
+  name: "carNet"
   type: "Data"
   top: "data"
   top: "label"
@@ -8,16 +8,25 @@ layer {
     phase: TRAIN
   }
   transform_param {
-    mean_file: "/home/cari/caffe_150323/CarStyle_test/car_mean.binaryproto"
+  # for images in particular horizontal mirroring and random cropping can be done as simple data  
+  # augmentations.
+   mirror:true  
+  # crop a `crop_size` x `crop_size` patch:
+  # - at random during training
+  # - from the center during testing 
+   crop_size: 135
+   
+   mean_file: "/home/cari/caffe/CarStyle_test/car_mean_15108.binaryproto"
   }
   data_param {
-    source: "/home/cari/caffe_150323/CarStyle_test/carstyle_train_lmdb"
-    batch_size: 20
+    source: "/home/cari/caffe/CarStyle_test/carstyle_train_lmdb"
+    batch_size: 100
     backend: LMDB
   }
 }
+
 layer {
-  name: "cifar"
+  name: "carNet"
   type: "Data"
   top: "data"
   top: "label"
@@ -25,11 +34,13 @@ layer {
     phase: TEST
   }
   transform_param {
-    mean_file: "/home/cari/caffe_150323/CarStyle_test/car_mean.binaryproto"
+    mirror:false
+    crop_size:135
+    mean_file: "/home/cari/caffe/CarStyle_test/car_mean_15108.binaryproto"
   }
   data_param {
-    source: "/home/cari/caffe_150323/CarStyle_test/carstyle_val_lmdb"
-    batch_size: 10
+    source: "/home/cari/caffe/CarStyle_test/carstyle_val_lmdb"
+    batch_size: 100
     backend: LMDB
   }
 }
@@ -39,12 +50,14 @@ layer {
   bottom: "data"
   top: "conv1"
   param {
+  # The multiplier on the global learning rate for this parameter [default = 1.0].
     lr_mult: 1
-    decay_mult : 0.001
+  # The multiplier on the global weight decay for this parameter [default = 1.0].
+   decay_mult : 0.001
   }
   param {
-    lr_mult: 1
-    decay_mult : 0
+    lr_mult: 2
+   decay_mult : 0
   }
   convolution_param {
     num_output: 16
@@ -52,13 +65,23 @@ layer {
     stride: 1
     weight_filler {
       type: "gaussian"
+      # 高斯分布的标准差
       std: 0.01
     }
     bias_filler {
       type: "constant"
+      # value [default = 0]
     }
   }
 }
+
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+
 layer {
   name: "pool1"
   type: "Pooling"
@@ -67,15 +90,10 @@ layer {
   pooling_param {
     pool: MAX
     kernel_size: 2
-    stride: 1
+    stride: 2
   }
 }
-layer {
-  name: "relu1"
-  type: "ReLU"
-  bottom: "pool1"
-  top: "pool1"
-}
+
 
 layer {
   name: "conv2"
@@ -84,14 +102,14 @@ layer {
   top: "conv2"
   param {
     lr_mult: 1
-    decay_mult : 0.001
+   decay_mult : 0.001
   }
   param {
-    lr_mult: 1
-    decay_mult : 0
+    lr_mult: 2
+   decay_mult : 0
   }
   convolution_param {
-    num_output: 16
+    num_output: 32
     kernel_size: 5
     stride: 1
     weight_filler {
@@ -120,8 +138,6 @@ layer {
     stride: 1
   }
 }
-
-
 layer {
   name: "ip1"
   type: "InnerProduct"
@@ -136,7 +152,7 @@ layer {
     decay_mult: 0
   }
   inner_product_param {
-    num_output: 100
+    num_output: 150
     weight_filler {
       type: "gaussian"
       std: 0.0001
@@ -160,7 +176,7 @@ layer {
     decay_mult: 0
   }
   inner_product_param {
-    num_output: 3
+    num_output: 50
     weight_filler {
       type: "gaussian"
       std: 0.01
