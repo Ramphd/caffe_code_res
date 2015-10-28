@@ -10,21 +10,20 @@ layer {
   transform_param {
   # for images in particular horizontal mirroring and random cropping can be done as simple data  
   # augmentations.
-   mirror:true  
+   mirror:true
   # crop a `crop_size` x `crop_size` patch:
   # - at random during training
   # - from the center during testing 
-   crop_size: 135
+   crop_size: 180
    
-   mean_file: "/home/cari/caffe/CarStyle_test/car_mean_15108.binaryproto"
+   mean_file: "/home/cari/caffe/CarStyle_test/carMeanFile_100kinds.binaryproto"
   }
   data_param {
     source: "/home/cari/caffe/CarStyle_test/carstyle_train_lmdb"
-    batch_size: 100
+    batch_size: 180
     backend: LMDB
   }
 }
-
 layer {
   name: "carNet"
   type: "Data"
@@ -35,12 +34,12 @@ layer {
   }
   transform_param {
     mirror:false
-    crop_size:135
-    mean_file: "/home/cari/caffe/CarStyle_test/car_mean_15108.binaryproto"
+    crop_size:180
+    mean_file: "/home/cari/caffe/CarStyle_test/carMeanFile_100kinds.binaryproto"
   }
   data_param {
     source: "/home/cari/caffe/CarStyle_test/carstyle_val_lmdb"
-    batch_size: 100
+    batch_size: 50
     backend: LMDB
   }
 }
@@ -53,19 +52,21 @@ layer {
   # The multiplier on the global learning rate for this parameter [default = 1.0].
     lr_mult: 1
   # The multiplier on the global weight decay for this parameter [default = 1.0].
-   decay_mult : 0.001
+   decay_mult : 1
   }
   param {
     lr_mult: 2
    decay_mult : 0
   }
   convolution_param {
-    num_output: 16
+    num_output: 20
     kernel_size: 5
     stride: 1
     weight_filler {
-      type: "gaussian"
+      # MSRA 是微软亚洲研究院的最新成果，对超大数据集应有良好疗效，目前仅能在conv1层使用
+      #type:"msra"
       # 高斯分布的标准差
+      type: "gaussian"
       std: 0.01
     }
     bias_filler {
@@ -74,14 +75,12 @@ layer {
     }
   }
 }
-
 layer {
   name: "relu1"
-  type: "ReLU"
+  type: "PReLU"
   bottom: "conv1"
   top: "conv1"
 }
-
 layer {
   name: "pool1"
   type: "Pooling"
@@ -93,26 +92,25 @@ layer {
     stride: 2
   }
 }
-
-
 layer {
   name: "conv2"
   type: "Convolution"
   bottom: "pool1"
   top: "conv2"
   param {
-    lr_mult: 1
-   decay_mult : 0.001
+   lr_mult: 1
+   decay_mult : 0.1
   }
   param {
     lr_mult: 2
    decay_mult : 0
   }
   convolution_param {
-    num_output: 32
+    num_output: 40
     kernel_size: 5
     stride: 1
     weight_filler {
+     #type:"msra"
       type: "gaussian"
       std: 0.01
     }
@@ -123,7 +121,7 @@ layer {
 }
 layer {
   name: "relu2"
-  type: "ReLU"
+  type: "PReLU"
   bottom: "conv2"
   top: "conv2"
 }
@@ -135,24 +133,70 @@ layer {
   pooling_param {
     pool: MAX
     kernel_size: 2
+    stride: 2
+  }
+}
+
+layer {
+  name: "conv3"
+  type: "Convolution"
+  bottom: "pool2"
+  top: "conv3"
+  param {
+   lr_mult: 1
+   decay_mult : 0.1
+  }
+  param {
+    lr_mult: 2
+    decay_mult : 0
+  }
+  convolution_param {
+    num_output: 50
+    kernel_size: 5
     stride: 1
+    weight_filler {
+      #type:"msra"
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+    }
   }
 }
 layer {
+  name: "relu3"
+  type: "PReLU"
+  bottom: "conv3"
+  top: "conv3"
+}
+layer {
+  name: "pool3"
+  type: "Pooling"
+  bottom: "conv3"
+  top: "pool3"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+
+layer {
   name: "ip1"
   type: "InnerProduct"
-  bottom: "pool2"
+  bottom: "pool3"
   top: "ip1"
   param {
     lr_mult: 1
-    decay_mult: 0.001
+    decay_mult: 0.1
   }
   param {
     lr_mult: 1
     decay_mult: 0
   }
   inner_product_param {
-    num_output: 150
+    num_output: 200
     weight_filler {
       type: "gaussian"
       std: 0.0001
@@ -169,14 +213,14 @@ layer {
   top: "ip2"
   param {
     lr_mult: 1
-    decay_mult: 0.001
+    decay_mult: 0.1
   }
   param {
     lr_mult: 1
     decay_mult: 0
   }
   inner_product_param {
-    num_output: 50
+    num_output: 104
     weight_filler {
       type: "gaussian"
       std: 0.01
@@ -186,7 +230,6 @@ layer {
     }
   }
 }
-
 layer {
   name: "accuracy"
   type: "Accuracy"
