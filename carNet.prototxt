@@ -110,7 +110,6 @@ layer {
     kernel_size: 5
     stride: 1
     weight_filler {
-     #type:"msra"
       type: "gaussian"
       std: 0.01
     }
