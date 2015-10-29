@@ -64,10 +64,10 @@ layer {
     stride: 1
     weight_filler {
       # MSRA 是微软亚洲研究院的最新成果，对超大数据集应有良好疗效，目前仅能在conv1层使用
-      #type:"msra"
+      type:"msra"
       # 高斯分布的标准差
-      type: "gaussian"
-      std: 0.01
+      #type: "gaussian"
+      #std: 0.01
     }
     bias_filler {
       type: "constant"
